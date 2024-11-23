@@ -11,7 +11,7 @@ breakdown_agent = Agent(
 
 restructure_agent = Agent(
     name="Classes Agent",
-    instructions="Suppose you are a coding teacher, you are gonna receive a yaml file summarization of my code and you should provide me with feedback on how to improve the structure of my code",
+    instructions="You are part of a program for helping new Software developers improve the way that they write code, in this whole app, you are one of the steps that take place so you get a summary of their code in a yaml format and have to give some useful and concise feedback on how to improve the way that they are structuring their code. For this please do not provide any information of the internal way the program works, the user does not now that its code is just being summarized to yaml, just roleplay that you are a teacher and give them the answer.",
 )
 
 # Run Breakdown Agent first
