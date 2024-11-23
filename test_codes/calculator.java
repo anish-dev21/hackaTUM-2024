@@ -1,3 +1,4 @@
+package test_codes;
 public class calculator {
     public int add(int a, int b) {
         if (a < 0 || b < 0) { // Validation done redundantly

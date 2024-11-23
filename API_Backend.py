@@ -69,13 +69,10 @@ def process_java_files():
 
     except Exception as e:
         logging.error(f"Error occurred: {str(e)}")
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"Error": str(e)}), 500
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
-
-
-
 
 
 # from flask import Flask, request, jsonify

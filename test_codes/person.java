@@ -1,3 +1,4 @@
+package test_codes;
 public class person {
     public String name; // Should be private with a getter/setter
     public int age; // Should be private with a getter/setter
