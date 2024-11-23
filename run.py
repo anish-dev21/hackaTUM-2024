@@ -1,16 +1,23 @@
 import os
+import agents
 
-# Specify the directory path
-folder_path = '/path/to/your/folder'
+folder_path = 'test'
 
-# Loop through each file in the directory
-for filename in os.listdir(folder_path):
-    file_path = os.path.join(folder_path, filename)
+def file_extraction():
+
+    file_path = os.path.join(root, filename)
     
-    # Check if it's a file (not a subdirectory)
-    if os.path.isfile(file_path):
-        print(f"File: {filename}")
-        # You can open or process the file here
-        # with open(file_path, 'r') as file:
-        #     content = file.read()
-        #     print(content)
+    relative_path = os.path.relpath(file_path, folder_path)
+    
+    with open(file_path, 'r') as file:
+        content = file.read()
+
+    return relative_path, content
+
+yaml_text = ""
+
+for root, dirs, files in os.walk(folder_path):
+    for filename in files:
+        extracted_text = file_extraction(filename)
+        yaml_text
+        
