@@ -1,3 +1,4 @@
+package test_codes;
 import java.util.Scanner; // Unused import
 import java.util.ArrayList;
 

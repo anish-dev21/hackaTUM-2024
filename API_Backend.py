@@ -1,6 +1,6 @@
 import logging
 from flask import Flask, request, jsonify
-from backend import run_classes_agent, run_combination_agent, breakdown_agent, dryness_agent, client
+# from backend import run_classes_agent, run_combination_agent, breakdown_agent, dryness_agent, client
 
 # Configure logging
 logging.basicConfig(
@@ -22,6 +22,11 @@ def process_java_files():
     Flask endpoint to process Java files and return refactoring suggestions.
     """
     try:
+        files = request.form(files)
+        print(files)
+    except Exception as e:
+        print(str(e))
+    try:
         # Parse incoming JSON request
         data = request.json
         logging.debug(f"Received request data: {data}")
@@ -32,40 +37,44 @@ def process_java_files():
 
         # Combine code from all files
         java_files = data['files']
-        combined_code = "\n".join(file['contents'] for file in java_files)
-        logging.debug(f"Combined code: {combined_code}")
+        for file in java_files:
+            logging.debug(file)
 
-        # Run Breakdown Agent
-        breakdown_response = client.run(
-            agent=breakdown_agent,
-            messages=[{"role": "user", "content": combined_code}]
-        ).messages[-1]["content"]
-        logging.debug(f"Breakdown Agent response: {breakdown_response}")
+        # combined_code = "\n".join(file['content'] for file in java_files)
+        # logging.debug(f"Combined code: {combined_code}")
 
-        # Run Dryness Agent
-        dryness_response = client.run(
-            agent=dryness_agent,
-            messages=[{"role": "user", "content": combined_code}]
-        ).messages[-1]["content"]
-        logging.debug(f"Dryness Agent response: {dryness_response}")
+        # # Run Breakdown Agent
+        # breakdown_response = client.run(
+        #     agent=breakdown_agent,
+        #     messages=[{"role": "user", "content": combined_code}]
+        # ).messages[-1]["content"]
+        # logging.debug(f"Breakdown Agent response: {breakdown_response}")
 
-        # Run Classes Agent
-        classes_response = run_classes_agent(breakdown_response)
-        logging.debug(f"Classes Agent response: {classes_response}")
+        # # Run Dryness Agent
+        # dryness_response = client.run(
+        #     agent=dryness_agent,
+        #     messages=[{"role": "user", "content": combined_code}]
+        # ).messages[-1]["content"]
+        # logging.debug(f"Dryness Agent response: {dryness_response}")
 
-        # Combine Responses
-        combination_response = run_combination_agent(classes_response, dryness_response)
-        logging.debug(f"Final combined response: {combination_response}")
+        # # Run Classes Agent
+        # classes_response = run_classes_agent(breakdown_response)
+        # logging.debug(f"Classes Agent response: {classes_response}")
 
-        # Send response back
-        result = {
-            "breakdown": breakdown_response,
-            "dryness": dryness_response,
-            "classes": classes_response,
-            "combined": combination_response
-        }
-        logging.info(f"Response to client: {result}")
-        return jsonify(result)
+        # # Combine Responses
+        # combination_response = run_combination_agent(classes_response, dryness_response)
+        # logging.debug(f"Final combined response: {combination_response}")
+
+        # # Send response back
+        # result = {
+        #     "breakdown": breakdown_response,
+        #     "dryness": dryness_response,
+        #     "classes": classes_response,
+        #     "combined": combination_response
+        # }
+        # logging.info(f"Response to client: {result}")
+        # return jsonify(result)
+        return ""
 
     except Exception as e:
         logging.error(f"Error occurred: {str(e)}")
