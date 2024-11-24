@@ -36,6 +36,8 @@ import com.intellij.openapi.diagnostic.Logger;
 
 public class AiRefactorToolWindow implements ToolWindowFactory {
     private static final Logger LOG = Logger.getInstance(AiRefactorToolWindow.class);
+    private JTextArea recommendationTextArea = new JTextArea();
+
 
     @Override
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
@@ -79,10 +81,7 @@ public class AiRefactorToolWindow implements ToolWindowFactory {
             try {
                 LOG.info("Running request analysis...");
                 Objects.requireNonNull(runRefactorAnalysis()).thenAccept(refactorSuggestions -> {
-                    for(RefactorSuggestion suggestion : refactorSuggestions) {
-                        System.out.println(suggestion);
-                    }
-                    // updateRecommendationsPanel(contentPanel, refactorSuggestions);
+                    updateRecommendationsPanel(contentPanel, refactorSuggestions);
                 });
 //                updateRecommendationsPanel(contentPanel, suggestions);
             } catch (Exception ex) {
@@ -93,83 +92,46 @@ public class AiRefactorToolWindow implements ToolWindowFactory {
         JPanel buttonPanel = new JPanel();
         buttonPanel.setBackground(new Color(30, 30, 30)); // Match the darker background
         buttonPanel.add(analyzeButton);
-        contentPanel.add(buttonPanel, BorderLayout.CENTER);
+        contentPanel.add(buttonPanel, BorderLayout.NORTH);
 
         // Add recommendations panel
-        JPanel recommendationsPanel = new JPanel();
-        recommendationsPanel.setLayout(new BoxLayout(recommendationsPanel, BoxLayout.Y_AXIS));
-        recommendationsPanel.setBackground(new Color(30, 30, 30)); // Match the darker background
-        JScrollPane scrollPane = new JScrollPane(recommendationsPanel);
-        scrollPane.setBorder(BorderFactory.createEmptyBorder());
-        contentPanel.add(scrollPane, BorderLayout.SOUTH);
+//        JPanel recommendationsPanel = new JPanel();
+//        recommendationsPanel.setLayout(new BoxLayout(recommendationsPanel, BoxLayout.Y_AXIS));
+//        recommendationsPanel.setBackground(new Color(30, 30, 30)); // Match the darker background
+//        JScrollPane scrollPane = new JScrollPane(recommendationsPanel);
+//        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+//        contentPanel.add(scrollPane, BorderLayout.SOUTH);
+
+        JPanel textArea = createScrollableTextField();
+        contentPanel.add(textArea, BorderLayout.CENTER);
 
         return contentPanel;
     }
 
+    private JPanel createScrollableTextField() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BorderLayout());
+
+        recommendationTextArea.setWrapStyleWord(true);
+        JScrollPane scrollPane = new JScrollPane(recommendationTextArea);
+        scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+        panel.add(scrollPane, BorderLayout.CENTER);
+        return panel;
+    }
+
     private void updateRecommendationsPanel(JPanel contentPanel, ArrayList<RefactorSuggestion> suggestions) {
-        JPanel recommendationsPanel = new JPanel();
-        recommendationsPanel.setLayout(new BoxLayout(recommendationsPanel, BoxLayout.Y_AXIS));
-        recommendationsPanel.setBackground(new Color(30, 30, 30)); // Match the darker background
-
-        for (RefactorSuggestion suggestion : suggestions) {
-            // Retrieve title using reflection
-            String title;
-            try {
-                Field titleField = suggestion.getClass().getDeclaredField("title");
-                titleField.setAccessible(true);
-                title = (String) titleField.get(suggestion);
-            } catch (Exception e) {
-                LOG.error("Failed to access title field: " + e.getMessage(), e);
-                title = "Untitled Suggestion";
-            }
-
-            // Retrieve details using reflection
-            String details;
-            try {
-                Field detailsField = suggestion.getClass().getDeclaredField("details");
-                detailsField.setAccessible(true);
-                details = (String) detailsField.get(suggestion);
-            } catch (Exception e) {
-                LOG.error("Failed to access details field: " + e.getMessage(), e);
-                details = "No details available.";
-            }
-
-            // Declare final variables for use in the inner class
-            final String suggestionTitle = title;
-            final String suggestionDetails = details;
-
-            JPanel suggestionPanel = new JPanel(new BorderLayout());
-            suggestionPanel.setBackground(Color.LIGHT_GRAY);
-            suggestionPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-            suggestionPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
-
-            JLabel titleLabel = new JLabel(suggestionTitle);
-            titleLabel.setFont(new Font("Sans-Serif", Font.BOLD, 12));
-            titleLabel.setForeground(Color.BLACK);
-
-            suggestionPanel.add(titleLabel, BorderLayout.CENTER);
-
-            // Add MouseListener to the suggestion panel
-            suggestionPanel.addMouseListener(new java.awt.event.MouseAdapter() {
-                public void mouseClicked(java.awt.event.MouseEvent evt) {
-                    JOptionPane.showMessageDialog(null, suggestionDetails, suggestionTitle, JOptionPane.INFORMATION_MESSAGE);
-                }
-
-                public void mouseEntered(java.awt.event.MouseEvent evt) {
-                    suggestionPanel.setBackground(Color.GRAY);
-                }
-
-                public void mouseExited(java.awt.event.MouseEvent evt) {
-                    suggestionPanel.setBackground(Color.LIGHT_GRAY);
-                }
-            });
-
-            recommendationsPanel.add(suggestionPanel);
+        String recommendations = "";
+        for(RefactorSuggestion suggestion : suggestions) {
+            recommendations += "================================================================\n";
+            recommendations += "Class: " + suggestion.getClassName() + "\n";
+            recommendations += "Complexity: " + suggestion.getComplexity() + "\n";
+            recommendations += "Priority: " + suggestion.getPriority() + "\n";
+            recommendations += "Issue: " + suggestion.getIssue() + "\n";
+            recommendations += "Suggestion: " + suggestion.getSuggestion() + "\n";
+            recommendations += "Impact: " + suggestion.getImpact() + "\n";
         }
 
-        contentPanel.add(recommendationsPanel, BorderLayout.SOUTH);
-        contentPanel.revalidate();
-        contentPanel.repaint();
+        recommendationTextArea.setText(recommendations);
     }
 
     private CompletableFuture<ArrayList<RefactorSuggestion>> runRefactorAnalysis() throws IOException, InterruptedException {
@@ -201,12 +163,7 @@ public class AiRefactorToolWindow implements ToolWindowFactory {
                         Type listType = new TypeToken<ArrayList<RefactorSuggestion>>() {}.getType();
 
                         // Parse the JSON response into a list of RefactorSuggestion
-                        ArrayList<RefactorSuggestion> suggestions = gson.fromJson(responseBody, listType);
-                        for(RefactorSuggestion refSuggestion : suggestions) {
-                            System.out.println(refSuggestion);
-                        }
-
-                        return new ArrayList<>(suggestions);
+                        return gson.fromJson(responseBody, listType);
                     } catch (Exception e) {
                         LOG.error("Failed to parse JSON response", e);
                         return new ArrayList<RefactorSuggestion>(); // Return an empty list on error
