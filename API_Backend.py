@@ -1,6 +1,6 @@
 import logging
 from flask import Flask, request, jsonify
-# from backend import run_classes_agent, run_combination_agent, breakdown_agent, dryness_agent, client
+from backend import run_breakdown_agent, run_restructure_agent, client
 
 # Configure logging
 logging.basicConfig(
@@ -29,42 +29,44 @@ def process_java_files():
     try:
         # Parse incoming JSON request
         data = request.json
-        logging.debug(f"Received request data: {data}")
+        # logging.debug(f"Received request data: {data}")
 
         if not data or 'files' not in data:
             logging.error("Invalid request: Missing 'files' field.")
             return jsonify({"error": "Invalid request. Expecting JSON with a 'files' field."}), 400
+        logging.debug("===================REQUEST BODY OK===================")
 
-        # Combine code from all files
+        # Convert each file to yml
         java_files = data['files']
+        yml_java_files = []
+
         for file in java_files:
-            logging.debug(file)
+            # Run Breakdown Agent
+            # breakdown_response = client.run(
+            #     agent=breakdown_agent,
+            #     messages=[{"role": "user", "content": file['content']}]
+            # ).messages[-1]["content"]
+            breakdown_response = run_breakdown_agent(file['content'])
+            yml_java_files.append(breakdown_response)
 
-        # combined_code = "\n".join(file['content'] for file in java_files)
-        # logging.debug(f"Combined code: {combined_code}")
+        logging.debug("===================BREAKDOWN DONE===================")
 
-        # # Run Breakdown Agent
-        # breakdown_response = client.run(
-        #     agent=breakdown_agent,
-        #     messages=[{"role": "user", "content": combined_code}]
-        # ).messages[-1]["content"]
-        # logging.debug(f"Breakdown Agent response: {breakdown_response}")
+        logging.debug(yml_java_files)
 
-        # # Run Dryness Agent
-        # dryness_response = client.run(
-        #     agent=dryness_agent,
-        #     messages=[{"role": "user", "content": combined_code}]
-        # ).messages[-1]["content"]
-        # logging.debug(f"Dryness Agent response: {dryness_response}")
+        logging.debug("===================CONSTRUCT RESTRUCTURE INPUT===================")
+        # construct the input to the second agent
+        restructuring_input = {}
+        for idx, java_file in enumerate(java_files):
+            filePath = java_file['relativePath']
+            yml_file = yml_java_files[idx]
+            restructuring_input[filePath] = yml_file
+        
+        logging.debug(restructuring_input)
+        logging.debug("===================START RESTRUCTURE===================")
+        restructure_response = run_restructure_agent(str(restructuring_input))
 
-        # # Run Classes Agent
-        # classes_response = run_classes_agent(breakdown_response)
-        # logging.debug(f"Classes Agent response: {classes_response}")
-
-        # # Combine Responses
-        # combination_response = run_combination_agent(classes_response, dryness_response)
-        # logging.debug(f"Final combined response: {combination_response}")
-
+        logging.debug("===================RESTRUCTURE DONE===================")
+        logging.debug(restructure_response)
         # # Send response back
         # result = {
         #     "breakdown": breakdown_response,
