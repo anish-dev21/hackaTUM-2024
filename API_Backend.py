@@ -1,10 +1,12 @@
 import logging
+import csv
+from io import StringIO
 from flask import Flask, request, jsonify
 from backend import run_breakdown_agent, run_restructure_agent, client
 
 # Configure logging
 logging.basicConfig(
-    level=logging.DEBUG,
+    level=logging.DEBUG,                  
     format="%(asctime)s [%(levelname)s] %(message)s",
     handlers=[
         logging.StreamHandler(),
@@ -67,20 +69,33 @@ def process_java_files():
 
         logging.debug("===================RESTRUCTURE DONE===================")
         logging.debug(restructure_response)
-        # # Send response back
-        # result = {
-        #     "breakdown": breakdown_response,
-        #     "dryness": dryness_response,
-        #     "classes": classes_response,
-        #     "combined": combination_response
-        # }
-        # logging.info(f"Response to client: {result}")
-        # return jsonify(result)
-        return ""
+
+        formatted_output = csv_to_dict_list(restructure_response)
+
+        return jsonify(formatted_output)
 
     except Exception as e:
         logging.error(f"Error occurred: {str(e)}")
         return jsonify({"Error": str(e)}), 500
+
+def csv_to_dict_list(csv_content):
+    # Define the headers
+    headers = [
+        "Class Name", "Type", "Package",
+        "Complexity", "Category",
+        "Priority", "Issue", "Suggestion", "Impact"
+    ]
+    
+    # Read the CSV content and convert to dictionary
+    dict_list = []
+    csv_reader = csv.reader(csv_content.splitlines())
+    for row in csv_reader:
+        if len(row) != len(headers):
+            continue  # Skip rows with mismatched columns
+        entry = {headers[i]: row[i] for i in range(len(headers))}
+        dict_list.append(entry)
+    
+    return dict_list
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
