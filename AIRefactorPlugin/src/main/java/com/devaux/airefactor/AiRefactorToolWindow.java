@@ -202,6 +202,9 @@ public class AiRefactorToolWindow implements ToolWindowFactory {
 
                         // Parse the JSON response into a list of RefactorSuggestion
                         ArrayList<RefactorSuggestion> suggestions = gson.fromJson(responseBody, listType);
+                        for(RefactorSuggestion refSuggestion : suggestions) {
+                            System.out.println(refSuggestion);
+                        }
 
                         return new ArrayList<>(suggestions);
                     } catch (Exception e) {

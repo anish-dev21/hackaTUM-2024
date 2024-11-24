@@ -1,14 +1,33 @@
 package com.devaux.airefactor.Data;
 
+import com.google.gson.annotations.SerializedName;
+
 public class RefactorSuggestion {
+    @SerializedName("Class Name")
     private String className;
+
+    @SerializedName("Type")
     private String type;
+
+    @SerializedName("Package")
     private String packageName;
+
+    @SerializedName("Complexity")
     private String complexity;
+
+    @SerializedName("Category")
     private String category;
+
+    @SerializedName("Priority")
     private String priority;
+
+    @SerializedName("Issue")
     private String issue;
+
+    @SerializedName("Suggestion")
     private String suggestion;
+
+    @SerializedName("Impact")
     private String impact;
 
     // Getters and Setters
