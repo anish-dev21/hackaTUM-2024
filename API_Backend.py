@@ -68,11 +68,12 @@ def process_java_files():
         restructure_response = run_restructure_agent(str(restructuring_input))
 
         logging.debug("===================RESTRUCTURE DONE===================")
-        logging.debug(restructure_response)
+        # logging.debug(restructure_response)
 
         formatted_output = csv_to_dict_list(restructure_response)
-
-        return jsonify(formatted_output)
+        json_output = jsonify(formatted_output)
+        logging.debug(json_output)
+        return json_output
 
     except Exception as e:
         logging.error(f"Error occurred: {str(e)}")
