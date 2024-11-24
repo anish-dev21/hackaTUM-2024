@@ -19,6 +19,8 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.URI;
@@ -54,7 +56,18 @@ public class AiRefactorToolWindow implements ToolWindowFactory {
             JPanel controlPanel = new JPanel();
             controlPanel.setLayout(new BorderLayout(10,10));
             controlPanel.add(new JLabel("Project refactor analysis."), BorderLayout.NORTH);
-            controlPanel.add(new JButton("Run refactor analysis"), BorderLayout.CENTER);
+
+            JButton btn = new JButton("Run refactor analysis");
+            btn.addActionListener(e -> {
+                try {
+                    LOG.info("Running request analysis...");
+                    RequestAnalysis();
+                } catch (Exception ex) {
+                    LOG.error("Error performing refactor analysis: " + ex.toString());
+                }
+            });
+
+            controlPanel.add(btn, BorderLayout.CENTER);
             return controlPanel;
         }
 
@@ -98,11 +111,14 @@ public class AiRefactorToolWindow implements ToolWindowFactory {
                 ArrayList<JavaFile> javaFiles = getProjectJavaFiles(project);
 
                 Gson gson = new Gson();
-                String json = gson.toJson(javaFiles);
+                String jsonArray = gson.toJson(javaFiles);
+                String jsonBody = String.format("{\"files\":%s}", jsonArray);
+
+                LOG.warn("Creating POST request with body: \n" + jsonBody);
                 HttpRequest request = HttpRequest.newBuilder()
-                        .uri(URI.create("http://127.0.0.1/api/endpoint"))
+                        .uri(URI.create("http://127.0.0.1:5000/process_java_files"))
                         .header("Content-Type", "application/json")
-                        .POST(HttpRequest.BodyPublishers.ofString(json))
+                        .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
                         .build();
 
                 try (HttpClient client = HttpClient.newHttpClient()) {
