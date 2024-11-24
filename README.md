@@ -1,6 +1,6 @@
 # intelliJent (hackaTUM-2024)
 
-Welcome to the **intelliJent (hackaTUM-2024)** repository! This project combines a robust backend API with an innovative AI-powered plugin for code refactoring, aimed at simplifying workflows and enhancing developer productivity. It is designed for use in modern software development environments, offering features like intelligent code suggestions and scalable backend services.
+Welcome to the **intelliJent (hackaTUM-2024)** repository! This is a hackathon project for JetBrains that combines a robust backend API with an innovative AI-powered plugin for code refactoring, aimed at simplifying workflows and enhancing developer productivity. It is designed for use in modern software development environments, offering features like intelligent code suggestions and scalable backend services.
 
 ---
 
