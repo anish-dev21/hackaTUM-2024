@@ -4,6 +4,10 @@ Welcome to the **intelliJent (hackaTUM-2024)** repository! This is a hackathon p
 
 ---
 
+Devpost: https://devpost.com/software/augsburg-team
+
+---
+
 ## Table of Contents
 
 1. [Repository Structure](#repository-structure)
@@ -82,8 +86,6 @@ Dedicated to refining backend services:
 A specialized branch for testing the application, covering:
 - Plugin functionality with test Java files.
 - API stability and integration tests.
-
----
 
 ---
 
